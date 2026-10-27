@@ -26,11 +26,7 @@ export default function App() {
   const [newResident, setNewResident] = useState({
     name: "",
     surName: "",
-<<<<<<< HEAD
     type: "Guest",
-=======
-    type: "Standard",
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
   });
   const [newBooking, setNewBooking] = useState({
     bookingDate: "",
@@ -111,23 +107,14 @@ export default function App() {
         createdAt: [],
         duringDate: [],
       });
-<<<<<<< HEAD
       showMsg("Робочу зону успішно створено!");
-=======
-      showMsg("Робочу зону додано!");
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       loadAllData();
     } catch (err) {
       showMsg(
         err.response?.data?.message ||
-<<<<<<< HEAD
           err.response?.data ||
           "Помилка створення робочої зони",
         "error"
-=======
-          "Потрібні права Admin для створення зони",
-        "error",
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       );
     }
   };
@@ -139,11 +126,7 @@ export default function App() {
       showMsg("Робочу зону видалено!");
       loadAllData();
     } catch (err) {
-<<<<<<< HEAD
       showMsg("Помилка видалення робочої зони", "error");
-=======
-      showMsg("Помилка видалення (лише для Admin)", "error");
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
     }
   };
 
@@ -152,13 +135,8 @@ export default function App() {
     e.preventDefault();
     try {
       await api.post("/residents", newResident);
-<<<<<<< HEAD
       showMsg("Резидента успішно зареєстровано!");
       setNewResident({ name: "", surName: "", type: "Guest" });
-=======
-      showMsg("Резидента зареєстровано!");
-      setNewResident({ name: "", surName: "", type: "Standard" });
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       loadAllData();
     } catch (err) {
       showMsg("Помилка реєстрації резидента", "error");
@@ -169,11 +147,7 @@ export default function App() {
     if (!window.confirm("Видалити дані резидента?")) return;
     try {
       await api.delete(`/residents/${id}`);
-<<<<<<< HEAD
       showMsg("Резидента видалено!");
-=======
-      showMsg("Резидента успішно видалено!");
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       loadAllData();
     } catch (err) {
       showMsg("Помилка видалення резидента", "error");
@@ -191,11 +165,7 @@ export default function App() {
         residentSurName: newBooking.residentSurName.trim(),
         residentMaxCount: parseInt(newBooking.residentMaxCount, 10),
       });
-<<<<<<< HEAD
       showMsg("Бронювання успішно оформлено!");
-=======
-      showMsg("Бронювання успішно зафіксовано!");
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       setNewBooking({
         bookingDate: "",
         timeBooking: 60,
@@ -215,35 +185,23 @@ export default function App() {
     try {
       const res = await api.delete(`/booking/${id}`);
       showMsg(
-<<<<<<< HEAD
         `Бронювання скасовано! До повернення: ${res.data.returnMoney ?? 0} грн`
-=======
-        `Бронювання скасовано! До повернення: ${res.data.returnMoney ?? 0} грн`,
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       );
       loadAllData();
     } catch (err) {
       showMsg(
         err.response?.data?.message || "Не вдалося скасувати бронювання",
-<<<<<<< HEAD
         "error"
-=======
-        "error",
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       );
     }
   };
 
-<<<<<<< HEAD
-  // Допоміжна функція для бейджів типів резидентів
   const renderResidentBadge = (type) => {
     if (type === "VIP") return <span style={ui.badgeVip}>VIP</span>;
     if (type === "Regular") return <span style={ui.badgeRegular}>Regular</span>;
     return <span style={ui.badgeGuest}>Guest</span>;
   };
 
-=======
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
   // --- ЕКРАН АВТОРИЗАЦІЇ ---
   if (!token) {
     return (
@@ -252,11 +210,7 @@ export default function App() {
           <div style={ui.logoArea}>
             <div style={ui.logoBadge}>💼</div>
             <h1 style={ui.title}>Coworking Space</h1>
-<<<<<<< HEAD
             <p style={ui.subtitle}>Керуйте простором та бронюванням</p>
-=======
-            <p style={ui.subtitle}>Керуйте бронюванням просто та зручно</p>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
           </div>
 
           {statusMsg.text && (
@@ -300,33 +254,20 @@ export default function App() {
 
             {isRegisterMode && (
               <div>
-<<<<<<< HEAD
                 <label style={ui.label}>Роль</label>
-=======
-                <label style={ui.label}>Рівень доступу</label>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                 <select
                   value={authRole}
                   onChange={(e) => setAuthRole(e.target.value)}
                   style={ui.input}
                 >
-<<<<<<< HEAD
                   <option value="User">User</option>
                   <option value="Admin">Admin</option>
-=======
-                  <option value="User">User (Клієнт)</option>
-                  <option value="Admin">Admin (Адміністратор)</option>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                 </select>
               </div>
             )}
 
             <button type="submit" style={ui.btnPrimary}>
-<<<<<<< HEAD
               {isRegisterMode ? "Зареєструватися" : "Увійти до системи"}
-=======
-              {isRegisterMode ? "Зареєструватися" : "Увійти до панелі"}
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
             </button>
           </form>
 
@@ -351,27 +292,15 @@ export default function App() {
   // --- ГОЛОВНА СТОРІНКА DASHBOARD ---
   return (
     <div style={ui.layout}>
-<<<<<<< HEAD
-      {/* Навігаційна панель */}
-=======
-      {/* Верхня навігаційна панель */}
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       <header style={ui.navbar}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <div style={ui.logoBadgeSmall}>💼</div>
           <div>
             <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>
-<<<<<<< HEAD
               Coworking Space
             </h2>
             <small style={{ color: "var(--text-muted)" }}>
               Панель управління бронюванням та кімнатами
-=======
-              Coworking OS
-            </h2>
-            <small style={{ color: "var(--text-muted)" }}>
-              Панель управління простором
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
             </small>
           </div>
         </div>
@@ -386,11 +315,6 @@ export default function App() {
         </div>
       </header>
 
-<<<<<<< HEAD
-      {/* Toast повідомлення */}
-=======
-      {/* Сповіщення (Toast) */}
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       {statusMsg.text && (
         <div
           style={{
@@ -402,11 +326,6 @@ export default function App() {
         </div>
       )}
 
-<<<<<<< HEAD
-      {/* Вкладки */}
-=======
-      {/* Вкладки перемикання */}
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
       <div style={ui.navTabs}>
         <button
           onClick={() => setActiveTab("bookings")}
@@ -428,7 +347,6 @@ export default function App() {
         </button>
       </div>
 
-<<<<<<< HEAD
       <main style={ui.mainGrid}>
         {/* ВКЛАДКА 1: БРОНЮВАННЯ */}
         {activeTab === "bookings" && (
@@ -437,17 +355,6 @@ export default function App() {
               <h3 style={ui.cardTitle}>Нове бронювання</h3>
               <p style={ui.cardDesc}>
                 Кімната підбирається автоматично за місткістю та вільним часом
-=======
-      {/* КОНТЕНТ ВКЛАДОК */}
-      <main style={ui.mainGrid}>
-        {/* Вкладка 1: Бронювання */}
-        {activeTab === "bookings" && (
-          <>
-            <div style={ui.card}>
-              <h3 style={ui.cardTitle}>Створити бронювання</h3>
-              <p style={ui.cardDesc}>
-                Вільна кімната та вартість розраховуються автоматично
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
               </p>
 
               <form
@@ -482,11 +389,7 @@ export default function App() {
                   }}
                 >
                   <div>
-<<<<<<< HEAD
                     <label style={ui.label}>Тривалість (хв)</label>
-=======
-                    <label style={ui.label}>Час (хвилин)</label>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                     <input
                       type="number"
                       min="15"
@@ -532,11 +435,7 @@ export default function App() {
                     <label style={ui.label}>Ім'я</label>
                     <input
                       type="text"
-<<<<<<< HEAD
                       placeholder="Іван"
-=======
-                      placeholder="Олексій"
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                       value={newBooking.residentName}
                       onChange={(e) =>
                         setNewBooking({
@@ -552,11 +451,7 @@ export default function App() {
                     <label style={ui.label}>Прізвище</label>
                     <input
                       type="text"
-<<<<<<< HEAD
                       placeholder="Франко"
-=======
-                      placeholder="Шевченко"
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                       value={newBooking.residentSurName}
                       onChange={(e) =>
                         setNewBooking({
@@ -578,17 +473,10 @@ export default function App() {
 
             <div style={ui.card}>
               <h3 style={ui.cardTitle}>Журнал бронювань</h3>
-<<<<<<< HEAD
               <p style={ui.cardDesc}>Активні заплановані сесії</p>
 
               {bookings.length === 0 ? (
                 <div style={ui.emptyState}>Немає зареєстрованих бронювань</div>
-=======
-              <p style={ui.cardDesc}>Усі заплановані та підтверджені візити</p>
-
-              {bookings.length === 0 ? (
-                <div style={ui.emptyState}>Немає активних бронювань</div>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
               ) : (
                 <div style={{ overflowX: "auto" }}>
                   <table style={ui.table}>
@@ -596,11 +484,7 @@ export default function App() {
                       <tr>
                         <th>Резидент</th>
                         <th>Дата та час</th>
-<<<<<<< HEAD
                         <th>Час</th>
-=======
-                        <th>Тривалість</th>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                         <th>Осіб</th>
                         <th>До сплати</th>
                         <th style={{ textAlign: "right" }}>Дії</th>
@@ -641,24 +525,12 @@ export default function App() {
           </>
         )}
 
-<<<<<<< HEAD
         {/* ВКЛАДКА 2: РОБОЧІ ЗОНИ */}
         {activeTab === "workspaces" && (
           <>
             <div style={ui.card}>
               <h3 style={ui.cardTitle}>Створити робочу зону</h3>
-              <p style={ui.cardDesc}>
-                Додайте нову кімнату для бронювання
-=======
-        {/* Вкладка 2: Робочі зони */}
-        {activeTab === "workspaces" && (
-          <>
-            <div style={ui.card}>
-              <h3 style={ui.cardTitle}>Нова локація</h3>
-              <p style={ui.cardDesc}>
-                Тільки для користувачів із правами адміністратора
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
-              </p>
+              <p style={ui.cardDesc}>Додайте нову кімнату для бронювання</p>
 
               <form
                 onSubmit={handleCreateWorkspace}
@@ -669,11 +541,7 @@ export default function App() {
                 }}
               >
                 <div>
-<<<<<<< HEAD
                   <label style={ui.label}>Тип кімнати</label>
-=======
-                  <label style={ui.label}>Розмір та місткість</label>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                   <select
                     value={newWorkspace.roomType}
                     onChange={(e) =>
@@ -707,33 +575,19 @@ export default function App() {
                       accentColor: "var(--primary)",
                     }}
                   />
-<<<<<<< HEAD
                   <span>Активна для бронювань</span>
                 </label>
 
                 <button type="submit" style={ui.btnPrimary}>
                   Додати кімнату
-=======
-                  <span>Готова до експлуатації</span>
-                </label>
-
-                <button type="submit" style={ui.btnPrimary}>
-                  Створити зону
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                 </button>
               </form>
             </div>
 
             <div style={ui.card}>
-<<<<<<< HEAD
               <h3 style={ui.cardTitle}>Робочі зони коворкінгу</h3>
               <p style={ui.cardDesc}>
                 Поточний статус доступності та зайнятих сесій
-=======
-              <h3 style={ui.cardTitle}>Доступні зали</h3>
-              <p style={ui.cardDesc}>
-                Поточний статус доступності робочих місць
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
               </p>
 
               <div style={ui.gridCards}>
@@ -752,11 +606,7 @@ export default function App() {
                           ws.isActive ? ui.statusActive : ui.statusInactive
                         }
                       >
-<<<<<<< HEAD
                         {ws.isActive ? "Активна" : "Вимкнена"}
-=======
-                        {ws.isActive ? "Вільна" : "Неактивна"}
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                       </span>
                     </div>
 
@@ -767,11 +617,7 @@ export default function App() {
                           color: "var(--text-muted)",
                         }}
                       >
-<<<<<<< HEAD
                         Зайнятих слотів:
-=======
-                        Заплановано сесій:
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                       </div>
                       <div style={{ fontSize: "1.25rem", fontWeight: 700 }}>
                         {ws.createdAt ? ws.createdAt.length : 0}
@@ -806,24 +652,12 @@ export default function App() {
           </>
         )}
 
-<<<<<<< HEAD
         {/* ВКЛАДКА 3: РЕЗИДЕНТИ */}
         {activeTab === "residents" && (
           <>
             <div style={ui.card}>
               <h3 style={ui.cardTitle}>Додати резидента</h3>
-              <p style={ui.cardDesc}>
-                Guest, Regular або VIP (зі знижкою 20%)
-=======
-        {/* Вкладка 3: Резиденти */}
-        {activeTab === "residents" && (
-          <>
-            <div style={ui.card}>
-              <h3 style={ui.cardTitle}>Новий резидент</h3>
-              <p style={ui.cardDesc}>
-                VIP-клієнти автоматично отримують 20% знижки
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
-              </p>
+              <p style={ui.cardDesc}>Guest, Regular або VIP (зі знижкою 20%)</p>
 
               <form
                 onSubmit={handleCreateResident}
@@ -837,11 +671,7 @@ export default function App() {
                   <label style={ui.label}>Ім'я</label>
                   <input
                     type="text"
-<<<<<<< HEAD
                     placeholder="Тарас"
-=======
-                    placeholder="Марія"
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                     value={newResident.name}
                     onChange={(e) =>
                       setNewResident({ ...newResident, name: e.target.value })
@@ -855,11 +685,7 @@ export default function App() {
                   <label style={ui.label}>Прізвище</label>
                   <input
                     type="text"
-<<<<<<< HEAD
                     placeholder="Григорович"
-=======
-                    placeholder="Коваленко"
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                     value={newResident.surName}
                     onChange={(e) =>
                       setNewResident({
@@ -873,11 +699,7 @@ export default function App() {
                 </div>
 
                 <div>
-<<<<<<< HEAD
                   <label style={ui.label}>Тип резидента</label>
-=======
-                  <label style={ui.label}>Тарифний план</label>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                   <select
                     value={newResident.type}
                     onChange={(e) =>
@@ -885,49 +707,30 @@ export default function App() {
                     }
                     style={ui.input}
                   >
-<<<<<<< HEAD
                     <option value="Guest">Guest (Гість)</option>
                     <option value="Regular">Regular (Постійний)</option>
-=======
-                    <option value="Standard">Standard (Базовий)</option>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                     <option value="VIP">VIP (Знижка 20%)</option>
                   </select>
                 </div>
 
                 <button type="submit" style={ui.btnPrimary}>
-<<<<<<< HEAD
                   Зберегти резидента
-=======
-                  Зберегти в базі
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                 </button>
               </form>
             </div>
 
             <div style={ui.card}>
               <h3 style={ui.cardTitle}>База резидентів</h3>
-<<<<<<< HEAD
               <p style={ui.cardDesc}>Список зареєстрованих клієнтів</p>
 
               {residents.length === 0 ? (
                 <div style={ui.emptyState}>Резидентів ще немає в базі</div>
-=======
-              <p style={ui.cardDesc}>Зареєстровані постійні відвідувачі</p>
-
-              {residents.length === 0 ? (
-                <div style={ui.emptyState}>Резидентів ще не додано</div>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
               ) : (
                 <table style={ui.table}>
                   <thead>
                     <tr>
                       <th>Користувач</th>
-<<<<<<< HEAD
                       <th>Тип</th>
-=======
-                      <th>Рівень</th>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                       <th style={{ textAlign: "right" }}>Дії</th>
                     </tr>
                   </thead>
@@ -937,19 +740,7 @@ export default function App() {
                         <td style={{ fontWeight: 600 }}>
                           {r.name} {r.surName}
                         </td>
-<<<<<<< HEAD
                         <td>{renderResidentBadge(r.type)}</td>
-=======
-                        <td>
-                          <span
-                            style={
-                              r.type === "VIP" ? ui.badgeVip : ui.badgeStandard
-                            }
-                          >
-                            {r.type}
-                          </span>
-                        </td>
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
                         <td style={{ textAlign: "right" }}>
                           <button
                             onClick={() => handleDeleteResident(r.id)}
@@ -1239,7 +1030,6 @@ const ui = {
     fontSize: "0.75rem",
     fontWeight: 700,
   },
-<<<<<<< HEAD
   badgeRegular: {
     background: "#e0f2fe",
     color: "#0369a1",
@@ -1249,9 +1039,6 @@ const ui = {
     fontWeight: 600,
   },
   badgeGuest: {
-=======
-  badgeStandard: {
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
     background: "#f1f5f9",
     color: "#475569",
     padding: "0.2rem 0.6rem",
@@ -1300,8 +1087,4 @@ const ui = {
     border: "2px dashed #cbd5e1",
     borderRadius: "var(--radius-md)",
   },
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> 04736398c971bc45f79ef84104ca2dac00efcf4b
