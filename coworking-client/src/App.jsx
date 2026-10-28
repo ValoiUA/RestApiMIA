@@ -3,16 +3,17 @@ import api from "./api";
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem("accessToken"));
+  const [role, setRole] = useState(localStorage.getItem("userRole") || "User");
   const [activeTab, setActiveTab] = useState("bookings");
   const [statusMsg, setStatusMsg] = useState({ type: "", text: "" });
 
-  // Стан авторизації
+  // Авторизація
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authRole, setAuthRole] = useState("User");
 
-  // Дані з API
+  // Дані з бекенду
   const [workspaces, setWorkspaces] = useState([]);
   const [residents, setResidents] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -50,17 +51,36 @@ export default function App() {
           password: authPassword,
           role: authRole,
         });
-        showMsg("Акаунт успішно зареєстровано! Увійдіть у систему.");
+        showMsg("Акаунт створено! Увійдіть до системи.");
         setIsRegisterMode(false);
       } else {
         const res = await api.post("/auth/login", {
           email: authEmail,
           password: authPassword,
         });
+
+        // Зберігаємо токени та роль
         localStorage.setItem("accessToken", res.data.accessToken);
         localStorage.setItem("refreshToken", res.data.refreshToken);
+
+        // Дістаємо роль із payload токена або з відповіді
+        let userRole = "User";
+        try {
+          const payload = JSON.parse(atob(res.data.accessToken.split(".")[1]));
+          userRole =
+            payload[
+              "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            ] ||
+            payload["role"] ||
+            "User";
+        } catch {
+          userRole = "User";
+        }
+
+        localStorage.setItem("userRole", userRole);
+        setRole(userRole);
         setToken(res.data.accessToken);
-        showMsg("Раді бачити вас знову!");
+        showMsg(`Ви увійшли як: ${userRole}`);
       }
     } catch (err) {
       showMsg(err.response?.data?.message || "Помилка автентифікації", "error");
@@ -70,6 +90,7 @@ export default function App() {
   const handleLogout = () => {
     localStorage.clear();
     setToken(null);
+    setRole("User");
   };
 
   const loadAllData = async () => {
@@ -84,11 +105,8 @@ export default function App() {
       setResidents(resRes.data);
       setBookings(bRes.data);
     } catch (err) {
-      if (err.response?.status === 401) {
-        handleLogout();
-      } else {
-        showMsg("Не вдалося завантажити актуальні дані", "error");
-      }
+      if (err.response?.status === 401) handleLogout();
+      else showMsg("Помилка завантаження даних", "error");
     } finally {
       setLoading(false);
     }
@@ -98,7 +116,7 @@ export default function App() {
     if (token) loadAllData();
   }, [token]);
 
-  // Робочі зони
+  // Робочі зони (Admin)
   const handleCreateWorkspace = async (e) => {
     e.preventDefault();
     try {
@@ -107,54 +125,52 @@ export default function App() {
         createdAt: [],
         duringDate: [],
       });
-      showMsg("Робочу зону успішно створено!");
+      showMsg("Робочу зону створено!");
       loadAllData();
     } catch (err) {
       showMsg(
-        err.response?.data?.message ||
-          err.response?.data ||
-          "Помилка створення робочої зони",
-        "error"
+        err.response?.data?.message || "Лише Admin може створювати кімнати",
+        "error",
       );
     }
   };
 
   const handleDeleteWorkspace = async (id) => {
-    if (!window.confirm("Ви дійсно хочете видалити цю зону?")) return;
+    if (!window.confirm("Видалити зону?")) return;
     try {
       await api.delete(`/workspaces/${id}`);
-      showMsg("Робочу зону видалено!");
+      showMsg("Зону видалено!");
       loadAllData();
     } catch (err) {
-      showMsg("Помилка видалення робочої зони", "error");
+      showMsg("Лише Admin може видаляти робочі зони", "error");
     }
   };
 
-  // Резиденти
+  // Резиденти (Admin)
   const handleCreateResident = async (e) => {
     e.preventDefault();
     try {
       await api.post("/residents", newResident);
-      showMsg("Резидента успішно зареєстровано!");
+      showMsg("Резидента збережено!");
       setNewResident({ name: "", surName: "", type: "Guest" });
       loadAllData();
     } catch (err) {
-      showMsg("Помилка реєстрації резидента", "error");
+      showMsg("Лише Admin може додавати резидентів", "error");
     }
   };
 
   const handleDeleteResident = async (id) => {
-    if (!window.confirm("Видалити дані резидента?")) return;
+    if (!window.confirm("Видалити резидента?")) return;
     try {
       await api.delete(`/residents/${id}`);
       showMsg("Резидента видалено!");
       loadAllData();
     } catch (err) {
-      showMsg("Помилка видалення резидента", "error");
+      showMsg("Лише Admin може видаляти резидентів", "error");
     }
   };
 
-  // Бронювання
+  // Бронювання (User & Admin)
   const handleCreateBooking = async (e) => {
     e.preventDefault();
     try {
@@ -165,7 +181,7 @@ export default function App() {
         residentSurName: newBooking.residentSurName.trim(),
         residentMaxCount: parseInt(newBooking.residentMaxCount, 10),
       });
-      showMsg("Бронювання успішно оформлено!");
+      showMsg("Бронювання успішно зафіксовано!");
       setNewBooking({
         bookingDate: "",
         timeBooking: 60,
@@ -175,31 +191,24 @@ export default function App() {
       });
       loadAllData();
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data;
-      showMsg(typeof msg === "string" ? msg : "Помилка бронювання", "error");
+      showMsg(
+        err.response?.data?.message ||
+          err.response?.data ||
+          "Помилка бронювання",
+        "error",
+      );
     }
   };
 
   const handleDeleteBooking = async (id) => {
-    if (!window.confirm("Скасувати це бронювання?")) return;
+    if (!window.confirm("Скасувати бронювання?")) return;
     try {
       const res = await api.delete(`/booking/${id}`);
-      showMsg(
-        `Бронювання скасовано! До повернення: ${res.data.returnMoney ?? 0} грн`
-      );
+      showMsg(`Скасовано! До повернення: ${res.data.returnMoney ?? 0} грн`);
       loadAllData();
     } catch (err) {
-      showMsg(
-        err.response?.data?.message || "Не вдалося скасувати бронювання",
-        "error"
-      );
+      showMsg("Не вдалося скасувати", "error");
     }
-  };
-
-  const renderResidentBadge = (type) => {
-    if (type === "VIP") return <span style={ui.badgeVip}>VIP</span>;
-    if (type === "Regular") return <span style={ui.badgeRegular}>Regular</span>;
-    return <span style={ui.badgeGuest}>Guest</span>;
   };
 
   // --- ЕКРАН АВТОРИЗАЦІЇ ---
@@ -210,7 +219,7 @@ export default function App() {
           <div style={ui.logoArea}>
             <div style={ui.logoBadge}>💼</div>
             <h1 style={ui.title}>Coworking Space</h1>
-            <p style={ui.subtitle}>Керуйте простором та бронюванням</p>
+            <p style={ui.subtitle}>Вхід до кабінету бронювання</p>
           </div>
 
           {statusMsg.text && (
@@ -254,25 +263,27 @@ export default function App() {
 
             {isRegisterMode && (
               <div>
-                <label style={ui.label}>Роль</label>
+                <label style={ui.label}>Роль нового користувача</label>
                 <select
                   value={authRole}
                   onChange={(e) => setAuthRole(e.target.value)}
                   style={ui.input}
                 >
-                  <option value="User">User</option>
-                  <option value="Admin">Admin</option>
+                  <option value="User">
+                    User (Клієнт - тільки бронювання)
+                  </option>
+                  <option value="Admin">Admin (Повний доступ)</option>
                 </select>
               </div>
             )}
 
             <button type="submit" style={ui.btnPrimary}>
-              {isRegisterMode ? "Зареєструватися" : "Увійти до системи"}
+              {isRegisterMode ? "Створити акаунт" : "Увійти"}
             </button>
           </form>
 
           <div style={ui.switchMode}>
-            <span>{isRegisterMode ? "Вже маєте профіль?" : "Вперше тут?"}</span>
+            <span>{isRegisterMode ? "Вже є профіль?" : "Вперше тут?"}</span>
             <button
               type="button"
               onClick={() => {
@@ -281,7 +292,7 @@ export default function App() {
               }}
               style={ui.linkBtn}
             >
-              {isRegisterMode ? "Увійти" : "Створити акаунт"}
+              {isRegisterMode ? "Увійти" : "Зареєструватися"}
             </button>
           </div>
         </div>
@@ -289,7 +300,9 @@ export default function App() {
     );
   }
 
-  // --- ГОЛОВНА СТОРІНКА DASHBOARD ---
+  // --- DASHBOARD ---
+  const isAdmin = role === "Admin";
+
   return (
     <div style={ui.layout}>
       <header style={ui.navbar}>
@@ -300,7 +313,8 @@ export default function App() {
               Coworking Space
             </h2>
             <small style={{ color: "var(--text-muted)" }}>
-              Панель управління бронюванням та кімнатами
+              Ви увійшли як: <b>{role}</b>{" "}
+              {isAdmin ? "👑 (Адміністратор)" : "👤 (Користувач)"}
             </small>
           </div>
         </div>
@@ -326,6 +340,7 @@ export default function App() {
         </div>
       )}
 
+      {/* Вкладки: для звичайного користувача показуємо тільки бронювання */}
       <div style={ui.navTabs}>
         <button
           onClick={() => setActiveTab("bookings")}
@@ -333,29 +348,32 @@ export default function App() {
         >
           📅 Бронювання <span style={ui.counter}>{bookings.length}</span>
         </button>
-        <button
-          onClick={() => setActiveTab("workspaces")}
-          style={activeTab === "workspaces" ? ui.navTabActive : ui.navTab}
-        >
-          🏢 Робочі зони <span style={ui.counter}>{workspaces.length}</span>
-        </button>
-        <button
-          onClick={() => setActiveTab("residents")}
-          style={activeTab === "residents" ? ui.navTabActive : ui.navTab}
-        >
-          👥 Резиденти <span style={ui.counter}>{residents.length}</span>
-        </button>
+
+        {isAdmin && (
+          <>
+            <button
+              onClick={() => setActiveTab("workspaces")}
+              style={activeTab === "workspaces" ? ui.navTabActive : ui.navTab}
+            >
+              🏢 Робочі зони <span style={ui.counter}>{workspaces.length}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("residents")}
+              style={activeTab === "residents" ? ui.navTabActive : ui.navTab}
+            >
+              👥 Резиденти <span style={ui.counter}>{residents.length}</span>
+            </button>
+          </>
+        )}
       </div>
 
       <main style={ui.mainGrid}>
-        {/* ВКЛАДКА 1: БРОНЮВАННЯ */}
+        {/* ВКЛАДКА 1: БРОНЮВАННЯ (ДОСТУПНА ВСІМ) */}
         {activeTab === "bookings" && (
           <>
             <div style={ui.card}>
-              <h3 style={ui.cardTitle}>Нове бронювання</h3>
-              <p style={ui.cardDesc}>
-                Кімната підбирається автоматично за місткістю та вільним часом
-              </p>
+              <h3 style={ui.cardTitle}>Забронювати місце</h3>
+              <p style={ui.cardDesc}>Оберіть час і кількість осіб</p>
 
               <form
                 onSubmit={handleCreateBooking}
@@ -389,7 +407,7 @@ export default function App() {
                   }}
                 >
                   <div>
-                    <label style={ui.label}>Тривалість (хв)</label>
+                    <label style={ui.label}>Час (хвилин)</label>
                     <input
                       type="number"
                       min="15"
@@ -435,7 +453,7 @@ export default function App() {
                     <label style={ui.label}>Ім'я</label>
                     <input
                       type="text"
-                      placeholder="Іван"
+                      placeholder="Олексій"
                       value={newBooking.residentName}
                       onChange={(e) =>
                         setNewBooking({
@@ -451,7 +469,7 @@ export default function App() {
                     <label style={ui.label}>Прізвище</label>
                     <input
                       type="text"
-                      placeholder="Франко"
+                      placeholder="Шевченко"
                       value={newBooking.residentSurName}
                       onChange={(e) =>
                         setNewBooking({
@@ -466,27 +484,27 @@ export default function App() {
                 </div>
 
                 <button type="submit" style={ui.btnPrimary}>
-                  Підтвердити бронювання
+                  Забронювати
                 </button>
               </form>
             </div>
 
             <div style={ui.card}>
-              <h3 style={ui.cardTitle}>Журнал бронювань</h3>
-              <p style={ui.cardDesc}>Активні заплановані сесії</p>
+              <h3 style={ui.cardTitle}>Активні бронювання</h3>
+              <p style={ui.cardDesc}>Список запланованих відвідувань</p>
 
               {bookings.length === 0 ? (
-                <div style={ui.emptyState}>Немає зареєстрованих бронювань</div>
+                <div style={ui.emptyState}>Немає активних бронювань</div>
               ) : (
                 <div style={{ overflowX: "auto" }}>
                   <table style={ui.table}>
                     <thead>
                       <tr>
                         <th>Резидент</th>
-                        <th>Дата та час</th>
-                        <th>Час</th>
+                        <th>Час початку</th>
+                        <th>Тривалість</th>
                         <th>Осіб</th>
-                        <th>До сплати</th>
+                        <th>Сума</th>
                         <th style={{ textAlign: "right" }}>Дії</th>
                       </tr>
                     </thead>
@@ -502,7 +520,7 @@ export default function App() {
                               timeStyle: "short",
                             })}
                           </td>
-                          <td>{b.timeBooking} хв.</td>
+                          <td>{b.timeBooking} хв</td>
                           <td>{b.residentMaxCount}</td>
                           <td>
                             <span style={ui.priceTag}>{b.totalPrice} ₴</span>
@@ -525,12 +543,12 @@ export default function App() {
           </>
         )}
 
-        {/* ВКЛАДКА 2: РОБОЧІ ЗОНИ */}
-        {activeTab === "workspaces" && (
+        {/* ВКЛАДКА 2: РОБОЧІ ЗОНИ (ЛИШЕ ADMIN) */}
+        {isAdmin && activeTab === "workspaces" && (
           <>
             <div style={ui.card}>
-              <h3 style={ui.cardTitle}>Створити робочу зону</h3>
-              <p style={ui.cardDesc}>Додайте нову кімнату для бронювання</p>
+              <h3 style={ui.cardTitle}>Додати робочу зону</h3>
+              <p style={ui.cardDesc}>Доступно тільки адміністраторам</p>
 
               <form
                 onSubmit={handleCreateWorkspace}
@@ -579,16 +597,14 @@ export default function App() {
                 </label>
 
                 <button type="submit" style={ui.btnPrimary}>
-                  Додати кімнату
+                  Створити зону
                 </button>
               </form>
             </div>
 
             <div style={ui.card}>
-              <h3 style={ui.cardTitle}>Робочі зони коворкінгу</h3>
-              <p style={ui.cardDesc}>
-                Поточний статус доступності та зайнятих сесій
-              </p>
+              <h3 style={ui.cardTitle}>Робочі зали</h3>
+              <p style={ui.cardDesc}>Поточний статус усіх зон</p>
 
               <div style={ui.gridCards}>
                 {workspaces.map((ws) => (
@@ -652,12 +668,12 @@ export default function App() {
           </>
         )}
 
-        {/* ВКЛАДКА 3: РЕЗИДЕНТИ */}
-        {activeTab === "residents" && (
+        {/* ВКЛАДКА 3: РЕЗИДЕНТИ (ЛИШЕ ADMIN) */}
+        {isAdmin && activeTab === "residents" && (
           <>
             <div style={ui.card}>
               <h3 style={ui.cardTitle}>Додати резидента</h3>
-              <p style={ui.cardDesc}>Guest, Regular або VIP (зі знижкою 20%)</p>
+              <p style={ui.cardDesc}>Керування базою постійних відвідувачів</p>
 
               <form
                 onSubmit={handleCreateResident}
@@ -721,7 +737,7 @@ export default function App() {
 
             <div style={ui.card}>
               <h3 style={ui.cardTitle}>База резидентів</h3>
-              <p style={ui.cardDesc}>Список зареєстрованих клієнтів</p>
+              <p style={ui.cardDesc}>Зареєстровані відвідувачі</p>
 
               {residents.length === 0 ? (
                 <div style={ui.emptyState}>Резидентів ще немає в базі</div>
@@ -740,7 +756,19 @@ export default function App() {
                         <td style={{ fontWeight: 600 }}>
                           {r.name} {r.surName}
                         </td>
-                        <td>{renderResidentBadge(r.type)}</td>
+                        <td>
+                          <span
+                            style={
+                              r.type === "VIP"
+                                ? ui.badgeVip
+                                : r.type === "Regular"
+                                  ? ui.badgeRegular
+                                  : ui.badgeGuest
+                            }
+                          >
+                            {r.type}
+                          </span>
+                        </td>
                         <td style={{ textAlign: "right" }}>
                           <button
                             onClick={() => handleDeleteResident(r.id)}
@@ -762,7 +790,7 @@ export default function App() {
   );
 }
 
-// ------------------ СТИЛІ ІНТЕРФЕЙСУ ------------------
+// Стилі
 const ui = {
   authPage: {
     display: "flex",
@@ -781,10 +809,7 @@ const ui = {
     maxWidth: "420px",
     padding: "2.5rem",
   },
-  logoArea: {
-    textAlign: "center",
-    marginBottom: "2rem",
-  },
+  logoArea: { textAlign: "center", marginBottom: "2rem" },
   logoBadge: {
     display: "inline-flex",
     alignItems: "center",
@@ -812,15 +837,8 @@ const ui = {
     letterSpacing: "-0.025em",
     marginBottom: "0.25rem",
   },
-  subtitle: {
-    color: "var(--text-muted)",
-    fontSize: "0.9rem",
-  },
-  layout: {
-    maxWidth: "1240px",
-    margin: "0 auto",
-    padding: "1.5rem",
-  },
+  subtitle: { color: "var(--text-muted)", fontSize: "0.9rem" },
+  layout: { maxWidth: "1240px", margin: "0 auto", padding: "1.5rem" },
   navbar: {
     display: "flex",
     justifyContent: "space-between",
@@ -855,7 +873,6 @@ const ui = {
     fontWeight: 600,
     fontSize: "0.9rem",
     cursor: "pointer",
-    transition: "all 0.2s ease",
   },
   navTabActive: {
     display: "flex",
@@ -892,11 +909,7 @@ const ui = {
     padding: "1.75rem",
     boxShadow: "var(--shadow-sm)",
   },
-  cardTitle: {
-    fontSize: "1.15rem",
-    fontWeight: 700,
-    marginBottom: "0.25rem",
-  },
+  cardTitle: { fontSize: "1.15rem", fontWeight: 700, marginBottom: "0.25rem" },
   cardDesc: {
     fontSize: "0.85rem",
     color: "var(--text-muted)",
@@ -918,7 +931,6 @@ const ui = {
     fontSize: "0.9rem",
     color: "var(--text-main)",
     outline: "none",
-    transition: "border-color 0.2s",
   },
   checkboxLabel: {
     display: "flex",
@@ -927,7 +939,6 @@ const ui = {
     fontSize: "0.9rem",
     fontWeight: 500,
     cursor: "pointer",
-    userSelect: "none",
   },
   btnPrimary: {
     padding: "0.75rem",
@@ -938,8 +949,6 @@ const ui = {
     border: "none",
     borderRadius: "var(--radius-md)",
     cursor: "pointer",
-    boxShadow: "0 4px 12px rgba(79, 70, 229, 0.25)",
-    transition: "background 0.2s",
   },
   btnSecondary: {
     padding: "0.55rem 0.95rem",
@@ -994,9 +1003,6 @@ const ui = {
     marginBottom: "1.25rem",
     fontWeight: 600,
     fontSize: "0.9rem",
-    display: "flex",
-    alignItems: "center",
-    boxShadow: "var(--shadow-sm)",
   },
   toastOk: {
     background: "var(--success-light)",
@@ -1058,11 +1064,7 @@ const ui = {
     padding: "1.25rem",
     boxShadow: "var(--shadow-sm)",
   },
-  roomBadge: {
-    fontSize: "0.85rem",
-    fontWeight: 700,
-    color: "var(--primary)",
-  },
+  roomBadge: { fontSize: "0.85rem", fontWeight: 700, color: "var(--primary)" },
   statusActive: {
     background: "var(--success-light)",
     color: "var(--success)",
