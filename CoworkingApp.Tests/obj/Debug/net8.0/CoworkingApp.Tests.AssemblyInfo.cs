@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CoworkingApp.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e7b3dcc7d9541328fdf79593ae3ed93efadb372")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ea7a984afe185a8488bb94da73395008bd66a0e3")]
 [assembly: System.Reflection.AssemblyProductAttribute("CoworkingApp.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CoworkingApp.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
