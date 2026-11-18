@@ -128,11 +128,8 @@ using (var scope = app.Services.CreateScope())
     await syncService.CleanupExpiredBookingsAsync();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
