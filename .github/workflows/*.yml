@@ -1,8 +1,0 @@
-- name: Restore dependencies
-  run: dotnet restore MyTodoApi/MyTodoApi.csproj
-
-- name: Build
-  run: dotnet build MyTodoApi/MyTodoApi.csproj --configuration Release --no-restore
-
-- name: Publish
-  run: dotnet publish MyTodoApi/MyTodoApi.csproj --configuration Release --no-restore -o ./publish
